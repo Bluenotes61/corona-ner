@@ -1,8 +1,27 @@
-import os, json, re
+import json, re
 from os import listdir
 from os.path import isfile, join
 import spacy
 from spacy.pipeline import EntityRuler
+
+collect_doc_paragraphs = True
+
+def read_article_collect(path):
+    with open(path) as f:
+        d = json.load(f)
+        paper_id = d['paper_id']
+        text = d['title']
+        for a in d['abstract']:
+            if len(a) > 0:
+                text = text + '\n' + a           
+        for b in d['body']:
+            if len(b) > 0:
+                text = text + '\n' + b           
+
+    if (len(text) > 1000000):
+        text = text[:100000]
+
+    return paper_id, [text]
 
 def read_article(path):
     with open(path) as f:
@@ -13,7 +32,10 @@ def read_article(path):
     return paper_id, paragraphs
 
 def tag_article(nlp, article_path):
-    paper_id, paragraphs = read_article(article_path)
+    if collect_doc_paragraphs:
+      paper_id, paragraphs = read_article_collect(article_path)
+    else:
+      paper_id, paragraphs = read_article(article_path)
 
     denotated_paragraphs = []
     for paragraph in paragraphs:
@@ -62,9 +84,12 @@ def main():
 
             docs.append(doc)
 
-        print('Document {} of {}. Denotated: {}'.format(i + 1, len(files), found))
+        print('Document {} of {}. Denotated: {}'.format(i + 1, len(files), found), end = '\r')
     
-    with open(join('data', 'corona_silver.json'), 'w') as fp:
+    fname = 'corona_silver.json'
+    if collect_doc_paragraphs:
+        fname = 'corona_silver_collected.json'
+    with open(join('data', fname), 'w') as fp:
         json.dump(docs, fp)
           
 if __name__ == '__main__':

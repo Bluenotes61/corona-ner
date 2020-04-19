@@ -1,6 +1,7 @@
+**/__pycache__
 /data/comm_use_subset_small
-/data/scispacy
+/data/CORD-19-research-challenge
+/corona_env
 /test
-/__pycache__
 /models
 /private
